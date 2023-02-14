@@ -1,14 +1,25 @@
+from dataclasses import dataclass
+
 import numpy as np
 
 from .layer import Layer
 
 
+@dataclass
+class Configuration:
+    layer_sizes: list
+    activations: list
+    learning_rate: float
+    epochs: int
+
+
 class SpamClassifier:
-    def __init__(self, layers_config, activations, learning_rate):
+    def __init__(self, configuration: Configuration):
         self.layers = []
-        for i in range(len(layers_config) - 1):
-            self.layers.append(Layer(layers_config[i], layers_config[i + 1], activations[i]))
-        self.learning_rate = learning_rate
+        for i in range(len(configuration.layer_sizes) - 1):
+            layer = Layer(configuration.layer_sizes[i], configuration.layer_sizes[i + 1], configuration.activations[i])
+            self.layers.append(layer)
+        self.learning_rate = configuration.learning_rate
 
     def __forward(self, data):
         activations = data
