@@ -8,12 +8,12 @@ class Activation(Enum):
 
     Attributes:
     SIGMOID : str
-        String representation of sigmoid activation function.
+        String representation of Sigmoid activation function.
     RELU : str
         String representation of ReLU activation function.
     """
-    SIGMOID = 'sigmoid'
-    RELU = 'relu'
+    SIGMOID = 'Sigmoid'
+    RELU = 'ReLU'
 
 
 class Layer:
