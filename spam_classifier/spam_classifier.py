@@ -1,49 +1,99 @@
 import numpy as np
 
 
+class Layer:
+    def __init__(self, n_input, n_output, activation_func):
+        self.last_output = None
+        self.last_input = None
+        variance = 2.0 / (n_input + n_output)
+        mean = 0
+        fan_in = n_input
+
+        np.random.seed(0)  # set a random seed for reproducibility
+
+        self.weights = np.random.normal(loc=mean, scale=np.sqrt(variance/fan_in), size=(n_input, n_output))
+        self.biases = np.zeros((1, n_output))
+        self.activation_func = activation_func
+
+    def forward(self, input_data):
+        self.last_input = input_data
+        linear_output = np.dot(input_data, self.weights) + self.biases
+        self.last_output = self.activation_func(linear_output)
+        return self.last_output
+
+    def backward(self, d_output, learning_rate):
+        d_linear_output = d_output * self.last_output * (1 - self.last_output)
+        d_weights = np.dot(self.last_input.T, d_linear_output)
+        d_biases = np.sum(d_linear_output, axis=0, keepdims=True)
+        d_input = np.dot(d_linear_output, self.weights.T)
+        self.weights += learning_rate * d_weights
+        self.biases += learning_rate * d_biases
+        return d_input
+
+
 class SpamClassifier:
-    def __init__(self, hidden_layer_size=15, learning_rate=0.05, epochs=12600, reg_lambda=0.01):
-        self.hidden_layer_size = hidden_layer_size
+    def __init__(
+            self,
+            layers_config=((54, 'sigmoid'), (15, 'sigmoid'), (15, 'sigmoid'), (1, 'sigmoid')),
+            learning_rate=0.01, epochs=2000, reg_lambda=0.01
+    ):
         self.learning_rate = learning_rate
         self.epochs = epochs
         self.reg_lambda = reg_lambda
-        self.weights_input_to_hidden = None
-        self.weights_hidden_to_output = None
+        self.layers = []
+
+        for i in range(1, len(layers_config)):
+            n_input, activation_func = layers_config[i - 1]
+            n_output, _ = layers_config[i]
+            layer = Layer(n_input, n_output, self.get_activation_func(activation_func))
+            self.layers.append(layer)
 
     @staticmethod
-    def __sigmoid(x):
-        return 1 / (1 + np.exp(-x))
+    def get_activation_func(name):
+        if name == 'sigmoid':
+            return lambda x: 1 / (1 + np.exp(-x))
+        elif name == 'relu':
+            return lambda x: np.maximum(0, x)
+        elif name == 'tanh':
+            return lambda x: np.tanh(x)
+        else:
+            raise ValueError('Unknown activation function: ' + name)
 
-    def train(self, data, features):
-        n_samples, n_features = data.shape
+    def score(self, data, features):
+        y_pred = self.predict(data)
+        return np.count_nonzero(y_pred == features) / features.shape[0]
 
-        limit = np.sqrt(6 / (n_features + self.hidden_layer_size))
-        self.weights_input_to_hidden = np.random.uniform(-limit, limit, size=(n_features, self.hidden_layer_size))
-        self.weights_hidden_to_output = np.random.uniform(-limit, limit, size=(self.hidden_layer_size, 1))
+    def train(self, train_data, features):
+        n_samples, n_features = train_data.shape
+
+        # Normalize data
+        means = np.mean(train_data, axis=0)
+        stds = np.std(train_data, axis=0)
+        train_data = (train_data - means) / stds
 
         for i in range(self.epochs):
             # forward pass
-            hidden_layer = SpamClassifier.__sigmoid(np.dot(data, self.weights_input_to_hidden))
-            output = SpamClassifier.__sigmoid(np.dot(hidden_layer, self.weights_hidden_to_output))
-
-            # loss calculation
-            loss = (-1/n_samples) * np.sum(features * np.log(output) + (1 - features) * np.log(1 - output))
-            # add L2 regularization penalty to loss
-            L2_penalty = (self.reg_lambda/(2*n_samples)) * (np.sum(np.square(self.weights_input_to_hidden)) + np.sum(np.square(self.weights_hidden_to_output)))
-            loss += L2_penalty
+            input_data = train_data
+            for layer in self.layers:
+                output = layer.forward(input_data)
+                input_data = output
 
             # backward pass
-            error = features.reshape(-1, 1) - output
-            d_output = error * output * (1 - output)
-            error_hidden_layer = np.dot(d_output, self.weights_hidden_to_output.T)
-            d_hidden_layer = error_hidden_layer * hidden_layer * (1 - hidden_layer)
+            d_output = (features.reshape(-1, 1) - input_data) * input_data * (1 - input_data)
+            d_input = d_output
+            for layer in reversed(self.layers):
+                d_input = layer.backward(d_input, self.learning_rate)
 
-            # update weights with L2 regularization penalty
-            self.weights_hidden_to_output += self.learning_rate * (np.dot(hidden_layer.T, d_output) - (self.reg_lambda/n_samples) * self.weights_hidden_to_output)
-            self.weights_input_to_hidden += self.learning_rate * (np.dot(data.T, d_hidden_layer) - (self.reg_lambda/n_samples) * self.weights_input_to_hidden)
+        # update weights with L2 regularization penalty
+        for layer in self.layers:
+            layer.weights += self.learning_rate * (-self.reg_lambda/n_samples * layer.weights)
 
-    def predict(self, data):
-        hidden_layer = SpamClassifier.__sigmoid(np.dot(data, self.weights_input_to_hidden))
-        output = SpamClassifier.__sigmoid(np.dot(hidden_layer, self.weights_hidden_to_output))
-        y_pred = (output > 0.5).astype(int).flatten()
+    def predict(self, test_data):
+        input_data = test_data
+        for layer in self.layers:
+            output = layer.forward(input_data)
+            input_data = output
+        y_pred = (input_data > 0.5).astype(int).flatten()
         return y_pred
+
+
