@@ -1,5 +1,3 @@
-import random
-
 import numpy as np
 
 from spam_classifier.spam_classifier import SpamClassifier
@@ -33,26 +31,6 @@ if __name__ == "__main__":
             ((54, 'sigmoid'), (40, 'sigmoid'), (40, 'sigmoid'), (1, 'sigmoid')),
             ((54, 'sigmoid'), (45, 'sigmoid'), (45, 'sigmoid'), (1, 'sigmoid')),
             ((54, 'sigmoid'), (50, 'sigmoid'), (50, 'sigmoid'), (1, 'sigmoid')),
-
-            ((54, 'sigmoid'), (5, 'relu'), (5, 'relu'), (1, 'sigmoid')),
-            ((54, 'sigmoid'), (10, 'relu'), (10, 'relu'), (1, 'sigmoid')),
-            ((54, 'sigmoid'), (15, 'relu'), (15, 'relu'), (1, 'sigmoid')),
-            ((54, 'sigmoid'), (20, 'relu'), (20, 'relu'), (1, 'sigmoid')),
-            ((54, 'sigmoid'), (25, 'relu'), (25, 'relu'), (1, 'sigmoid')),
-            ((54, 'sigmoid'), (30, 'relu'), (35, 'relu'), (1, 'sigmoid')),
-            ((54, 'sigmoid'), (40, 'relu'), (40, 'relu'), (1, 'sigmoid')),
-            ((54, 'sigmoid'), (45, 'relu'), (45, 'relu'), (1, 'sigmoid')),
-            ((54, 'sigmoid'), (50, 'relu'), (50, 'relu'), (1, 'sigmoid')),
-
-            ((54, 'sigmoid'), (5, 'relu'), (5, 'relu'), (1, 'tanh')),
-            ((54, 'sigmoid'), (10, 'relu'), (10, 'relu'), (1, 'tanh')),
-            ((54, 'sigmoid'), (15, 'relu'), (15, 'relu'), (1, 'tanh')),
-            ((54, 'sigmoid'), (20, 'relu'), (20, 'relu'), (1, 'tanh')),
-            ((54, 'sigmoid'), (25, 'relu'), (25, 'relu'), (1, 'tanh')),
-            ((54, 'sigmoid'), (30, 'relu'), (35, 'relu'), (1, 'tanh')),
-            ((54, 'sigmoid'), (40, 'relu'), (40, 'relu'), (1, 'tanh')),
-            ((54, 'sigmoid'), (45, 'relu'), (45, 'relu'), (1, 'tanh')),
-            ((54, 'sigmoid'), (50, 'relu'), (50, 'relu'), (1, 'tanh')),
         ),
         'epochs': np.arange(1000, 3000, 100),
         'learning_rate': np.logspace(-4, -1, 100),

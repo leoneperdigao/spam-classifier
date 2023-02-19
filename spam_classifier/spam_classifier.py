@@ -94,9 +94,9 @@ class SpamClassifier:
 
     def __init__(
             self,
-            layers_config: List[Tuple[int, str]] = ((54, 'sigmoid'), (15, 'sigmoid'), (15, 'sigmoid'), (1, 'sigmoid')),
+            layers_config: List[Tuple[int, str]] = ((54, 'sigmoid'), (25, 'relu'), (25, 'relu'), (1, 'tanh')),
             learning_rate: float = 0.01,
-            epochs: int = 2000,
+            epochs: int = 1100,
             reg_lambda: float = 0.01
     ):
         """
@@ -108,11 +108,14 @@ class SpamClassifier:
             epochs (int): The number of training epochs.
             reg_lambda (float): The regularization parameter to use during training.
         """
+        self.layers = []
+        self.layers_config = layers_config
         self.learning_rate = learning_rate
         self.epochs = epochs
         self.reg_lambda = reg_lambda
-        self.layers = []
 
+    def init_layers(self, layers_config):
+        self.layers = []
         for i in range(1, len(layers_config)):
             n_input, activation_func = layers_config[i - 1]
             n_output, _ = layers_config[i]
@@ -162,6 +165,9 @@ class SpamClassifier:
             features (numpy.ndarray): The labels corresponding to the data.
         """
         n_samples, n_features = train_data.shape
+
+        # init layers
+        self.init_layers()
 
         # Normalize data
         means = np.mean(train_data, axis=0)
