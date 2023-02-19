@@ -1,3 +1,5 @@
+import random
+
 import matplotlib.pyplot as plt
 from itertools import product
 
@@ -23,7 +25,7 @@ class Tuner:
         best_params = None
         iteration = 0
 
-        np.random.shuffle(param_combinations)
+        random.shuffle(param_combinations)
 
         for params in param_combinations:
             iteration += 1
