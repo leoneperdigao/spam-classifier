@@ -114,11 +114,11 @@ class SpamClassifier:
         self.epochs = epochs
         self.reg_lambda = reg_lambda
 
-    def init_layers(self, layers_config):
+    def init_layers(self):
         self.layers = []
-        for i in range(1, len(layers_config)):
-            n_input, activation_func = layers_config[i - 1]
-            n_output, _ = layers_config[i]
+        for i in range(1, len(self.layers_config)):
+            n_input, activation_func = self.layers_config[i - 1]
+            n_output, _ = self.layers_config[i]
             layer = Layer(n_input, n_output, self.get_activation_func(activation_func))
             self.layers.append(layer)
 
