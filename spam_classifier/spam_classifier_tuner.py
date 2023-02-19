@@ -1,4 +1,5 @@
 import random
+import time
 
 import matplotlib.pyplot as plt
 from itertools import product
@@ -18,7 +19,8 @@ class Tuner:
         results = {
             'params': [],
             'train_score': [],
-            'test_score': []
+            'test_score': [],
+            'train_time': []
         }
 
         best_test_score = 0
@@ -34,15 +36,22 @@ class Tuner:
             for param, value in zip(self.param_grid.keys(), params):
                 setattr(self.model, param, value)
 
+            start_time = time.time()
             self.model.train(train_samples, train_features)
+            end_time = time.time()
+
+            if end_time - start_time > 30:
+                print(f"Skipping hyperparams={params} because training took longer than 30s")
+                continue
+
             train_score = self.model.score(train_samples, train_features)
-            self.model.train(test_samples, test_features)
             test_score = self.model.score(test_samples, test_features)
 
-            print(f"iteration={iteration}, hyperparams={params}, train_score={train_score}, test_score {test_score}")
+            print(f"iteration={iteration}, hyperparams={params}, train_score={train_score}, test_score={test_score}, train_time={end_time-start_time:.2f}s")
 
             results['train_score'].append(train_score)
             results['test_score'].append(test_score)
+            results['train_time'].append(end_time - start_time)
 
             if test_score > best_test_score:
                 best_test_score = test_score
@@ -52,14 +61,14 @@ class Tuner:
         self.results = results
 
     def plot(self):
-        plt.figure(figsize=(15, 5))
+        plt.figure(figsize=(15, 10))
 
         # Plot learning curves
         epochs_values = [params[1] for params in self.results['params']]
         train_scores = self.results['train_score']
         test_scores = self.results['test_score']
 
-        plt.subplot(1, 3, 1)
+        plt.subplot(2, 2, 1)
         plt.scatter(epochs_values, train_scores, label='Train', color='blue')
         plt.scatter(epochs_values, test_scores, label='Test', color='red')
         plt.xlabel('Epochs')
@@ -71,7 +80,7 @@ class Tuner:
         train_scores = self.results['train_score']
         test_scores = self.results['test_score']
 
-        plt.subplot(1, 3, 2)
+        plt.subplot(2, 2, 2)
         plt.scatter(learning_rate_values, train_scores, label='Train', color='blue')
         plt.scatter(learning_rate_values, test_scores, label='Test', color='red')
         plt.xscale('log')
@@ -83,7 +92,7 @@ class Tuner:
         train_scores = self.results['train_score']
         test_scores = self.results['test_score']
 
-        plt.subplot(1, 3, 3)
+        plt.subplot(2, 2, 3)
         plt.scatter(reg_lambda_values, train_scores, label='Train', color='blue')
         plt.scatter(reg_lambda_values, test_scores, label='Test', color='red')
         plt.xscale('log')
@@ -91,12 +100,25 @@ class Tuner:
         plt.ylabel('Accuracy')
         plt.legend()
 
+        # Plot training time distribution
+        training_times = self.results['train_time']
+        training_params = [params for i, params in enumerate(self.results['params'])]
+        training_times = [time for time in training_times]
+
+        plt.subplot(2, 2, 4)
+        plt.hist(training_times, bins=10)
+        plt.xlabel('Training time (s)')
+        plt.ylabel('Frequency')
+        plt.xlim(0, 30)  # Excludes times greater than 30 seconds
+        plt.title('Training Time Distribution (excluding >30s)')
+        plt.ylim(0, len(training_params))
+
         plt.tight_layout()
         plt.savefig('results/hyperparams-vs-accuracy.png', dpi=300)
         plt.show()
 
         # Linear plot to compare training and test accuracy
-        plt.subplot(1, 1, 1)
+        plt.figure(figsize=(8, 6))
         plt.plot(train_scores, label='Train')
         plt.plot(test_scores, label='Test')
         plt.xlabel('Iteration')
