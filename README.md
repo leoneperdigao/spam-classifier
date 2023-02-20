@@ -6,7 +6,9 @@ that can be used for training and predicting.
 ## Methodology
 
 The neural network consists of a configurable number of layers, each with a specified number of nodes and activation 
-function. The default configuration is ((54, 'sigmoid'), (40, 'sigmoid'), (40, 'sigmoid'), (1, 'sigmoid')), which has three hidden layers with 54, 40, and 40 nodes respectively, and an output layer with a single node. The sigmoid function is used as the activation function for all layers.
+function. The default configuration is ((54, 'sigmoid'), (40, 'sigmoid'), (40, 'sigmoid'), (1, 'sigmoid')), which has 
+three hidden layers with 54, 40, and 40 nodes respectively, and an output layer with a single node. The sigmoid function
+is used as the activation function for all layers.
 
 The model is trained using backpropagation with L2 regularization. The training data is first normalized, and the 
 weights are updated using the calculated gradients and the learning rate. The regularization parameter is used to 
