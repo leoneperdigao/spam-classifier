@@ -10,6 +10,14 @@ function. The default configuration is ((54, 'sigmoid'), (40, 'sigmoid'), (40, '
 three hidden layers with 54, 40, and 40 nodes respectively, and an output layer with a single node. The sigmoid function
 is used as the activation function for all layers.
 
+The Spam Classifier model supports three different activation functions: 
+- sigmoid: The sigmoid activation function maps any input to a value between 0 and 1, making it suitable for binary classification problems where the output is a probability
+  - Formula: `f(x) = 1 / (1 + exp(-x))`
+- ReLU: The ReLU function, on the other hand, is best suited for problems with non-linear separable datasets. ReLU returns 0 for any negative input and the input value for any non-negative input, which can help prevent the vanishing gradient problem. 
+  - Formula: `f(x) = max(0, x)`
+- hyperbolic tangent (tanh): The tanh function maps any input to a value between -1 and 1, which can be useful for classification problems where the output may take on negative values. 
+  - Formula: `f(x) = (exp(x) - exp(-x)) / (exp(x) + exp(-x))`
+
 The model is trained using backpropagation with L2 regularization. The training data is first normalized, and the 
 weights are updated using the calculated gradients and the learning rate. The regularization parameter is used to 
 penalize large weights and prevent overfitting.
