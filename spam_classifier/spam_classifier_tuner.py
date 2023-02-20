@@ -8,13 +8,15 @@ import numpy as np
 
 
 class Tuner:
-    def __init__(self, model, param_grid, cv=3):
+    def __init__(self, model, param_grid, max_iter=18000):
         self.results = None
         self.model = model
         self.param_grid = param_grid
+        self.max_iter = max_iter
 
     def fit(self, train_samples, train_features, test_samples, test_features):
         param_combinations = list(product(*self.param_grid.values()))
+        print(f"Total num of combinations: {len(param_combinations)}")
 
         results = {
             'params': [],
@@ -56,6 +58,9 @@ class Tuner:
             if test_score > best_test_score:
                 best_test_score = test_score
                 best_params = params
+
+            if iteration >= self.max_iter:
+                break
 
         print(f"best_test_score={best_test_score}, best_params={best_params}")
         self.results = results

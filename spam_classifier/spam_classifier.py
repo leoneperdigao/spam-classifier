@@ -94,10 +94,10 @@ class SpamClassifier:
 
     def __init__(
             self,
-            layers_config: List[Tuple[int, str]] = ((54, 'sigmoid'), (25, 'relu'), (25, 'relu'), (1, 'tanh')),
-            learning_rate: float = 0.01,
-            epochs: int = 1100,
-            reg_lambda: float = 0.01
+            layers_config: List[Tuple[int, str]] = ((54, 'sigmoid'), (40, 'sigmoid'), (40, 'sigmoid'), (1, 'sigmoid')),
+            learning_rate: float = 0.043,
+            epochs: int = 1200,
+            reg_lambda: float = 3.48
     ):
         """
         Initializes a SpamClassifier object with the specified configuration.
