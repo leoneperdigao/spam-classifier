@@ -6,17 +6,6 @@ import numpy as np
 class Layer:
     """
     A class representing a single layer in a neural network.
-
-    Attributes:
-        last_output (numpy.ndarray): The output of the layer during the last forward pass.
-        last_input (numpy.ndarray): The input to the layer during the last forward pass.
-        weights (numpy.ndarray): The weights of the layer.
-        biases (numpy.ndarray): The biases of the layer.
-        activation_func (function): The activation function of the layer.
-
-    Methods:
-        forward(input_data): Performs a forward pass through the layer.
-        backward(d_output, learning_rate): Performs a backward pass through the layer and updates its weights and biases.
     """
 
     def __init__(self, n_input, n_output, activation_func):
@@ -78,18 +67,6 @@ class Layer:
 class SpamClassifier:
     """
     A class representing a spam classifier that uses a neural network with configurable architecture.
-
-    Attributes:
-        learning_rate (float): The learning rate to use during training.
-        epochs (int): The number of training epochs.
-        reg_lambda (float): The regularization parameter to use during training.
-        layers (List[Layer]): A list of Layer objects representing the layers in the neural network.
-
-    Methods:
-        get_activation_func(name): Returns a function for the specified activation function name.
-        score(data, features): Computes the accuracy of the classifier on the given data and labels.
-        train(train_data, features): Trains the classifier on the given data and labels.
-        predict(test_data): Predicts the labels for the given test data.
     """
 
     def __init__(
