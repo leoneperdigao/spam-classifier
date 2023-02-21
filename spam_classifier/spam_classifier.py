@@ -19,15 +19,23 @@ class Layer:
         """
         self.last_output = None
         self.last_input = None
-        variance = 2.0 / (n_input + n_output)
-        mean = 0
-        fan_in = n_input
+        self.activation_func = activation_func
 
         np.random.seed(0)  # set a random seed for reproducibility
 
-        self.weights = np.random.normal(loc=mean, scale=np.sqrt(variance/fan_in), size=(n_input, n_output))
+        if self.activation_func == np.tanh:
+            fan_in = n_input
+        else:
+            fan_in = n_input / 2
+
+        if self.activation_func == np.maximum:
+            variance = 2.0 / fan_in
+        else:
+            variance = 2.0 / (n_input + n_output)
+
+        mean = 0
+        self.weights = np.random.normal(loc=mean, scale=np.sqrt(variance), size=(n_input, n_output))
         self.biases = np.zeros((1, n_output))
-        self.activation_func = activation_func
 
     def forward(self, input_data):
         """
