@@ -21,7 +21,7 @@ class Layer:
         self.last_input = None
         self.activation_func = activation_func
 
-        np.random.seed(0)  # set a random seed for reproducibility
+        # np.random.seed(0)  # set a random seed for reproducibility
 
         if self.activation_func == np.tanh:
             fan_in = n_input
@@ -79,10 +79,11 @@ class SpamClassifier:
 
     def __init__(
             self,
-            layers_config: List[Tuple[int, str]] = ((54, 'sigmoid'), (40, 'sigmoid'), (40, 'sigmoid'), (1, 'sigmoid')),
-            learning_rate: float = 0.043,
-            epochs: int = 1200,
-            reg_lambda: float = 3.48
+            layers_config: List[Tuple[int, str]] = ((54, 'sigmoid'), (20, 'sigmoid'), (20, 'sigmoid'), (1, 'sigmoid')),
+            learning_rate: float = 0.024,
+            epochs: int = 1600,
+            reg_lambda: float = 6.62,
+            weights_file: str = None
     ):
         """
         Initializes a SpamClassifier object with the specified configuration.
@@ -92,12 +93,14 @@ class SpamClassifier:
             learning_rate (float): The learning rate to use during training.
             epochs (int): The number of training epochs.
             reg_lambda (float): The regularization parameter to use during training.
+            weights_file (str): The file name to use for saving/loading the weights of the layers.
         """
         self.layers = []
         self.layers_config = layers_config
         self.learning_rate = learning_rate
         self.epochs = epochs
         self.reg_lambda = reg_lambda
+        self.weights_file = weights_file
 
     def init_layers(self):
         self.layers = []
@@ -106,6 +109,23 @@ class SpamClassifier:
             n_output, _ = self.layers_config[i]
             layer = Layer(n_input, n_output, self.get_activation_func(activation_func))
             self.layers.append(layer)
+
+    def save_weights(self):
+        """
+        Saves the weights of the layers to an external file using the numpy.save function.
+        """
+        weights = []
+        for layer in self.layers:
+            weights.append(layer.weights)
+        np.save(self.weights_file, weights)
+
+    def load_weights(self):
+        """
+        Loads the weights of the layers from an external file using the numpy.load function.
+        """
+        weights = np.load(self.weights_file, allow_pickle=True)
+        for i in range(len(self.layers)):
+            self.layers[i].weights = weights[i]
 
     @staticmethod
     def get_activation_func(name: str):
@@ -141,13 +161,14 @@ class SpamClassifier:
         y_pred = self.predict(data)
         return np.count_nonzero(y_pred == features) / features.shape[0]
 
-    def train(self, train_data: np.ndarray, features: np.ndarray) -> None:
+    def train(self, train_data: np.ndarray, features: np.ndarray, save_weights=False) -> None:
         """
         Trains the classifier on the given data and labels.
 
         Args:
             train_data (numpy.ndarray): The data to train the classifier on.
             features (numpy.ndarray): The labels corresponding to the data.
+            save_weights (bool): A flag to controls if the layer's weight will be stored
         """
         n_samples, n_features = train_data.shape
 
@@ -176,6 +197,11 @@ class SpamClassifier:
         for layer in self.layers:
             layer.weights += self.learning_rate * (-self.reg_lambda/n_samples * layer.weights)
 
+        if save_weights:
+            if not self.weights_file:
+                raise ValueError("If save_weights is True, weights_file is also required")
+            self.save_weights()
+
     def predict(self, test_data: np.ndarray) -> np.ndarray:
         """
         Predicts the labels for the given test data.
@@ -186,6 +212,10 @@ class SpamClassifier:
         Returns:
             numpy.ndarray: The predicted labels.
         """
+        if self.weights_file:
+            self.init_layers()
+            self.load_weights()
+
         input_data = test_data
         for i, layer in enumerate(self.layers):
             output = layer.forward(input_data)

@@ -18,7 +18,9 @@ testing_data = testing_spam[:, 1:]
 testing_features = testing_spam[:, 0].astype(np.float64)
 
 if __name__ == "__main__":
-    model = SpamClassifier()
+    model = SpamClassifier(weights_file='./data/weights.npy')
+    model.train(training_data, training_features, save_weights=False)
+    print(model.score(testing_data, testing_features))  # 93%
 
     param_grid = {
         'layers_config': (
@@ -37,6 +39,7 @@ if __name__ == "__main__":
         'reg_lambda': np.arange(0.01, 10.001, 0.01)
     }
 
-    tuner = Tuner(model, param_grid)
+    tuner = Tuner(model, param_grid, max_iter=1000)
     tuner.fit(training_data, training_features, testing_data, testing_features)
     tuner.plot()
+
